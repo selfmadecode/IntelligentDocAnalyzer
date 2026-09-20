@@ -1,0 +1,61 @@
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+
+# Visual Studio cache/options
+.vscode/
+.idea/
+
+# Test results
+TestResults/
+*.trx
+*.testlog
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Generated files
+Generated/
+wwwroot/lib/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Azure / local settings
+appsettings.Development.json
+
+# User-specific ASP.NET Core files
+secrets.json
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml
