@@ -1,0 +1,6 @@
+@IntelligentDocAnalyzer_HostAddress = http://localhost:5103
+
+GET {{IntelligentDocAnalyzer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
