@@ -8,7 +8,8 @@ public class RecognitionJob
     public DateTime SubmittedAtUtc { get; set; }
     public DateTime? CompletedAtUtc { get; set; }
     public string? ModelUsed { get; set; }
-    public List<Transaction>? Result { get; set; }
+    public StatementAnalysisResult Result { get; set; } = new StatementAnalysisResult();
+    //public List<Transaction>? Result { get; set; }
     public string? ErrorMessage { get; set; }
 
     // Held only until the worker processes the job, then cleared so completed
