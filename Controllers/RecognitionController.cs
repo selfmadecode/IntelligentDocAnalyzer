@@ -1,4 +1,5 @@
-﻿using IntelligentDocAnalyzer.Interfaces;
+﻿using IntelligentDocAnalyzer.Dto;
+using IntelligentDocAnalyzer.Interfaces;
 using IntelligentDocAnalyzer.Models;
 using IntelligentDocAnalyzer.Services;
 using Microsoft.AspNetCore.Http;
@@ -32,8 +33,9 @@ public class RecognitionController : ControllerBase
     [RequestSizeLimit(25_000_000)]
     [HttpPost("analyze-file")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<RecognitionJobResponse>> Submit(IFormFile file, CancellationToken cancellationToken)
+    public async Task<ActionResult<RecognitionJobResponse>> Submit([FromForm] FileDTO dto, CancellationToken cancellationToken)
     {
+        var file = dto.File;
         if (file == null || file.Length == 0)
         {
             return BadRequest("No file uploaded.");
