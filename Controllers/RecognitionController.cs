@@ -2,9 +2,7 @@
 using IntelligentDocAnalyzer.Interfaces;
 using IntelligentDocAnalyzer.Models;
 using IntelligentDocAnalyzer.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace IntelligentDocAnalyzer.Controllers;
 
@@ -12,15 +10,13 @@ namespace IntelligentDocAnalyzer.Controllers;
 [ApiController]
 public class RecognitionController : ControllerBase
 {
-    private readonly IJobStore _jobStore;
-    private readonly IBackgroundTaskQueue _queue;
+    private readonly IRecognitionJobState _jobStore;
     private readonly StatementProcessor _processor;
     private readonly FinancialAnalyzer _analyzer;
 
-    public RecognitionController(IJobStore jobStore, IBackgroundTaskQueue queue, StatementProcessor processor, FinancialAnalyzer analyzer)
+    public RecognitionController(IRecognitionJobState jobStore, StatementProcessor processor, FinancialAnalyzer analyzer)
     {
         _jobStore = jobStore;
-        _queue = queue;
         _processor = processor;
         _analyzer = analyzer;
     }
@@ -41,12 +37,7 @@ public class RecognitionController : ControllerBase
             return BadRequest("No file uploaded.");
         }
 
-        await using var stream = file.OpenReadStream();
-        var content = await BinaryData.FromStreamAsync(stream, cancellationToken);
-
-        var job = _jobStore.Create(file.FileName, content);
-        await _queue.EnqueueAsync(job.Id, cancellationToken);
-
+        var job = await _jobStore.CreateState(dto, cancellationToken);
         var response = new RecognitionJobResponse(job);
         return AcceptedAtAction(nameof(GetResult), new { id = job.Id }, response);
     }
@@ -54,9 +45,10 @@ public class RecognitionController : ControllerBase
     // GET api/recognition/{id}
     // Replies with the current state, and the parsed result once it's ready.
     [HttpGet("{id:guid}")]
-    public ActionResult<RecognitionJobResponse> GetResult(Guid id)
+    public async Task<ActionResult<RecognitionJobResponse>> GetResult(Guid id)
     {
-        if (!_jobStore.TryGet(id, out var job) || job == null)
+        var job = await _jobStore.TryGet(id);
+        if (job == null)
         {
             return NotFound();
         }
