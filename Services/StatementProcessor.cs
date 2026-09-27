@@ -1,4 +1,3 @@
-using System.Globalization;
 using Azure.AI.DocumentIntelligence;
 using IntelligentDocAnalyzer.Helpers;
 using IntelligentDocAnalyzer.Models;
@@ -24,19 +23,7 @@ public class StatementProcessor
         _docService = docService;
     }
 
-    public async Task<(List<Transaction> transactions, string modelUsed)> ProcessAsync(IFormFile file)
-    {
-        var content = await file.ToMemoryStreamAsync();
-
-        if (content.CanSeek)
-            content.Position = 0;
-
-        var data = await BinaryData.FromStreamAsync(content);
-
-        return await ProcessAsync(data);
-    }
-
-    private async Task<(List<Transaction> transactions, string modelUsed)> ProcessAsync(BinaryData content)
+    public async Task<(List<Transaction> transactions, string modelUsed)> ProcessAsync(BinaryData content)
     {
         AnalyzeResult? result = null;
         string used = string.Empty;
@@ -204,7 +191,7 @@ public class StatementProcessor
                     if (string.IsNullOrEmpty(txt))
                         continue;
 
-                    headers[NormalizeHeader(txt)] = c;
+                    headers[txt.NormalizeHeader()] = c;
                 }
 
                 for (int r = 1; r < table.RowCount; r++)
@@ -214,7 +201,7 @@ public class StatementProcessor
                     if (headers.TryGetValue("date", out var dateIdx))
                     {
                         var cell = table.Cells.FirstOrDefault(x => x.RowIndex == r && x.ColumnIndex == dateIdx);
-                        txn.Date = TryParseDate(cell?.Content);
+                        txn.Date = cell?.Content.TryParseDate();
                     }
 
                     if (headers.TryGetValue("description", out var descIdx))
@@ -227,13 +214,13 @@ public class StatementProcessor
                     if (headers.TryGetValue("amount", out var amtIdx))
                     {
                         var cell = table.Cells.FirstOrDefault(x => x.RowIndex == r && x.ColumnIndex == amtIdx);
-                        txn.Amount = TryParseDecimal(cell?.Content);
+                        txn.Amount = cell?.Content.TryParseDecimal() ?? 0m;
                     }
 
                     if (headers.TryGetValue("balance", out var balIdx))
                     {
                         var cell = table.Cells.FirstOrDefault(x => x.RowIndex == r && x.ColumnIndex == balIdx);
-                        txn.Balance = TryParseNullableDecimal(cell?.Content);
+                        txn.Balance = cell?.Content.TryParseNullableDecimal();
                     }
 
                     if (txn.Amount == 0)
@@ -241,7 +228,7 @@ public class StatementProcessor
                         for (int c = table.ColumnCount - 1; c >= 0; c--)
                         {
                             var cell = table.Cells.FirstOrDefault(x => x.RowIndex == r && x.ColumnIndex == c);
-                            var val = TryParseNullableDecimal(cell?.Content);
+                            var val = cell?.Content.TryParseNullableDecimal();
                             if (val.HasValue)
                             {
                                 txn.Amount = val.Value;
@@ -274,10 +261,10 @@ public class StatementProcessor
                         var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                         DateTime? date = null;
                         
-                        if (parts.Length > 0) date = TryParseDate(parts[0]);
+                        if (parts.Length > 0) date = parts[0].TryParseDate();
                         
                         decimal amt = 0;
-                        if (parts.Length > 0) amt = TryParseDecimal(parts[^1]);
+                        if (parts.Length > 0) amt = parts[^1].TryParseDecimal();
 
                         if (amt != 0 || date.HasValue)
                         {
@@ -289,69 +276,5 @@ public class StatementProcessor
         }
 
         return txns;
-    }
-
-    private static string NormalizeHeader(string text)
-    {
-        if (string.IsNullOrEmpty(text))
-            return string.Empty;
-
-        var clean = text.Trim().ToLowerInvariant();
-
-        if (clean.Contains("date"))
-            return "date";
-
-        if (clean.Contains("description") || clean.Contains("details") || clean.Contains("transaction"))
-            return "description";
-
-        if (clean.Contains("amount") || clean.Contains("debit") || clean.Contains("credit") || clean.Contains("payment"))
-            return "amount";
-
-        if (clean.Contains("balance"))
-            return "balance";
-
-        if (clean.Contains("merchant") || clean.Contains("payee"))
-            return "merchant";
-
-        return clean;
-    }
-
-    private static DateTime? TryParseDate(string? text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-            return null;
-
-        text = text.Trim().Trim('\u200E', '\u200F');
-
-        DateTime dt;
-        string[] formats = { "M/d/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd/MM/yyyy", "M/d/yy", "MM/dd/yy" };
-
-        if (DateTime.TryParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-            return dt;
-
-        if (DateTime.TryParse(text, out dt))
-            return dt;
-
-        return null;
-    }
-
-    private static decimal TryParseDecimal(string? text)
-    {
-        var n = TryParseNullableDecimal(text);
-        return n ?? 0m;
-    }
-
-    private static decimal? TryParseNullableDecimal(string? text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-            return null;
-
-        var cleaned = text.Replace("$", string.Empty).Replace(",", string.Empty).Replace("(", "-").Replace(")", "").Trim();
-        
-        if (decimal.TryParse(cleaned, NumberStyles.Number | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var val))
-            return val;
-
-        if (decimal.TryParse(cleaned, NumberStyles.Number | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.CurrentCulture, out val)) return val;
-        return null;
-    }
+    }    
 }
