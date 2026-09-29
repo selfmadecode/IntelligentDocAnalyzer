@@ -1,7 +1,12 @@
-﻿namespace IntelligentDocAnalyzer.Models;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace IntelligentDocAnalyzer.Models;
 
 public class RecognitionJob
 {
+    [BsonId]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
     public string FileName { get; set; } = string.Empty;
     public JobStatus Status { get; set; } = JobStatus.Queued;
@@ -9,10 +14,7 @@ public class RecognitionJob
     public DateTime? CompletedAtUtc { get; set; }
     public string? ModelUsed { get; set; }
     public StatementAnalysisResult Result { get; set; } = new StatementAnalysisResult();
-    //public List<Transaction>? Result { get; set; }
     public string? ErrorMessage { get; set; }
+    public ObjectId? FileId { get; set; }
 
-    // Held only until the worker processes the job, then cleared so completed
-    // jobs don't keep the original file bytes sitting in memory.
-    public BinaryData? Content { get; set; }
 }
