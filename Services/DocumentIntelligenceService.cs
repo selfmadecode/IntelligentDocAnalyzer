@@ -21,9 +21,6 @@ public class DocumentIntelligenceService
         _client = new DocumentIntelligenceClient(new Uri(endpoint), credential);
     }
 
-    /// <summary>
-    /// Analyze a document Azure can fetch itself from a URL (e.g. a blob SAS URL).
-    /// </summary>
     public async Task<AnalyzeResult> AnalyzeDocumentAsync(string modelId, Uri uriSource)
     {
         if (uriSource == null)
@@ -34,9 +31,6 @@ public class DocumentIntelligenceService
         return operation.Value;
     }
 
-    /// <summary>
-    /// Analyze raw document bytes.
-    /// </summary>
     public async Task<AnalyzeResult> AnalyzeDocumentAsync(string modelId, BinaryData content)
     {
         if (content == null)
@@ -47,9 +41,6 @@ public class DocumentIntelligenceService
         return operation.Value;
     }
 
-    /// <summary>
-    /// Convenience overload for callers that still have a Stream (e.g. an uploaded file).
-    /// </summary>
     public async Task<AnalyzeResult> AnalyzeDocumentAsync(string modelId, Stream content)
     {
         if (content == null)
