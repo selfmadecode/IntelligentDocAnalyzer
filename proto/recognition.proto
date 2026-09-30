@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option csharp_namespace = "IntelligentDocAnalyzer.Grpc";
+
+package recognition;
+
+service Recognition {
+  // Uploads a bank statement file and queues it for recognition
+  rpc SubmitFile (SubmitFileRequest) returns (SubmitFileResponse);
+
+  // Polls a previously submitted job
+  rpc GetResult (GetResultRequest) returns (GetResultResponse);
+
+  // Analyzes a bank statement from a URL directly
+  rpc AnalyzeUrl (AnalyzeUrlRequest) returns (AnalyzeUrlResponse);
+}
+
+message SubmitFileRequest {
+  string file_name = 1;
+  bytes file_content = 2;
+}
+
+message SubmitFileResponse {
+  string job_id = 1;
+  string status = 2;
+}
+
+message GetResultRequest {
+  string job_id = 1;
+}
+
+message GetResultResponse {
+  string job_id = 1;
+  string status = 2;
+  string file_name = 3;
+  string model_used = 4;
+  string error_message = 5;
+  // The same StatementAnalysisResult the REST API returns, JSON-encoded —
+  // avoids hand-mirroring every nested Transaction/Category/Insight type as
+  // its own protobuf message. Empty until status is "Completed".
+  string result_json = 6;
+}
+
+message AnalyzeUrlRequest {
+  string file_url = 1;
+}
+
+message AnalyzeUrlResponse {
+  // The same StatementAnalysisResult the REST API returns, JSON-encoded.
+  string result_json = 1;
+}
