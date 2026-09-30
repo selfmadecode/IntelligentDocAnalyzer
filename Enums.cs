@@ -5,5 +5,6 @@ public enum JobStatus
     Queued,
     Processing,
     Completed,
-    Failed
+    Failed,
+    Scheduled
 }
