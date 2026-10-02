@@ -21,9 +21,7 @@ public class RecognitionBatchDispatcher
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly ILogger<RecognitionBatchDispatcher> _logger;
 
-    public RecognitionBatchDispatcher(
-        MongoDbContext dbContext,
-        IBackgroundJobClient backgroundJobClient,
+    public RecognitionBatchDispatcher(MongoDbContext dbContext, IBackgroundJobClient backgroundJobClient,
         ILogger<RecognitionBatchDispatcher> logger)
     {
         _dbContext = dbContext;
