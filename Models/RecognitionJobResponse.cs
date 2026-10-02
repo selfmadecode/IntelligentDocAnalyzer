@@ -8,7 +8,6 @@ public class RecognitionJobResponse
     public DateTime SubmittedAtUtc { get; }
     public DateTime? CompletedAtUtc { get; }
     public string? ModelUsed { get; }
-    //public List<Transaction>? Result { get; }
     public StatementAnalysisResult? Result { get; set; }
     public string? ErrorMessage { get; }
 
