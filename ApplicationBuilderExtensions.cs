@@ -10,8 +10,7 @@ public static class ApplicationBuilderExtensions
         using var scope = app.ApplicationServices.CreateScope();
         var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
-        recurringJobManager.AddOrUpdate<RecognitionBatchDispatcher>(
-            "recognition-batch-dispatcher",
+        recurringJobManager.AddOrUpdate<RecognitionBatchDispatcher>("recognition-batch-dispatcher",
             dispatcher => dispatcher.DispatchNextBatchAsync(default),
             "*/8 * * * *");
 
