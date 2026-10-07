@@ -9,8 +9,11 @@ public class DocumentIntelligenceService
 
     public DocumentIntelligenceService(IConfiguration configuration)
     {
-        var endpoint = configuration["AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT"] ?? Environment.GetEnvironmentVariable("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT");
-        var key = configuration["AZURE_DOCUMENT_INTELLIGENCE_KEY"] ?? Environment.GetEnvironmentVariable("AZURE_DOCUMENT_INTELLIGENCE_KEY");
+        var endpoint = configuration["AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT"]
+            ?? Environment.GetEnvironmentVariable("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT");
+
+        var key = configuration["AZURE_DOCUMENT_INTELLIGENCE_KEY"]
+            ?? Environment.GetEnvironmentVariable("AZURE_DOCUMENT_INTELLIGENCE_KEY");
        
         if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(key))
         {
@@ -21,22 +24,22 @@ public class DocumentIntelligenceService
         _client = new DocumentIntelligenceClient(new Uri(endpoint), credential);
     }
 
-    public async Task<AnalyzeResult> AnalyzeDocumentAsync(string modelId, Uri uriSource)
-    {
-        if (uriSource == null)
-            throw new ArgumentNullException(nameof(uriSource));
-
-        Operation<AnalyzeResult> operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, uriSource);
-        
-        return operation.Value;
-    }
-
     public async Task<AnalyzeResult> AnalyzeDocumentAsync(string modelId, BinaryData content)
     {
         if (content == null)
             throw new ArgumentNullException(nameof(content));
 
         Operation<AnalyzeResult> operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, content);
+
+        return operation.Value;
+    }
+
+    public async Task<AnalyzeResult> AnalyzeDocumentAsync(string modelId, Uri uriSource)
+    {
+        if (uriSource == null)
+            throw new ArgumentNullException(nameof(uriSource));
+
+        Operation<AnalyzeResult> operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, uriSource);
         
         return operation.Value;
     }
