@@ -49,11 +49,11 @@ public class RecognitionJobState : IRecognitionJobState
         var options = new GridFSUploadOptions
         {
             Metadata = new BsonDocument
-        {
-            { "contentType", file.ContentType },
-            { "fileName", file.FileName },
-            { "jobId", job.Id.ToString() }
-        }
+            {
+                { "contentType", file.ContentType },
+                { "fileName", file.FileName },
+                { "jobId", job.Id.ToString() }
+            }
         };
 
         return await _mongo.GridFS.UploadFromStreamAsync(
