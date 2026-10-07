@@ -5,14 +5,9 @@ using MongoDB.Driver;
 
 namespace IntelligentDocAnalyzer.Services;
 
-// Replaces the always-listening BackgroundService. This only runs when triggered
-// (see HangfireSetup for the recurring safety net, and wire an on-submit trigger
-// from wherever a job is created) instead of polling MongoDB in a tight loop.
-//
 // Each run claims up to BatchSize queued jobs and hands each one to Hangfire with
-// a staggered delay, so the 30s spacing between Azure calls is enforced by
-// Hangfire's own scheduler rather than a manual Task.Delay inside a long-running
-// loop.
+// a staggered delay, so the 45s spacing between Azure calls is enforced by
+// Hangfire's own scheduler
 public class RecognitionBatchDispatcher
 {
     private const int BatchSize = 10;
